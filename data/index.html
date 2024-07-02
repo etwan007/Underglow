@@ -7,7 +7,8 @@
 <body>
   <section class="customColor">
     <div class="wheel">
-      <div id="colorWheel"></div> <!-- Corrected ID to match JavaScript -->
+      <div id="colorWheel"></div>
+      <button id="setColorButton">Set Color</button>
     </div>
   </section>
   
@@ -24,15 +25,26 @@
     colorWheel.on('color:change', function(color) {
       // Change the background color of the wheel section
       document.querySelector('.wheel').style.backgroundColor = color.hexString;
+    });
 
-      // Send color value to the server
-      fetch("/color?value=" + color.hexString.substring(1))
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-        })
-        .catch(error => console.error("Fetch error:", error));
+    // Handle set color button click
+    document.getElementById('setColorButton').addEventListener('click', function() {
+      var color = colorWheel.color.hexString.substring(1);
+      fetch("/color", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "value=" + color
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.text();
+      })
+      .then(data => console.log(data))
+      .catch(error => console.error("Fetch error:", error));
     });
 
     // Function to start animation
@@ -44,14 +56,13 @@
   </script>
   <section class="animations">
     <h1>Animations</h1>
-  <section class="buttons">
-    <button onclick="startAnimation(1)">Rainbow Wave</button>
-    <button onclick="startAnimation(2)">Confetti</button>
-    <button onclick="startAnimation(3)">Sinelon</button>
-    <button onclick="startAnimation(4)">BPM</button>
-    <button onclick="startAnimation(5)">Juggle</button>
+    <section class="buttons">
+      <button onclick="startAnimation(0)">Rainbow Wave</button>
+      <button onclick="startAnimation(1)">Confetti</button>
+      <button onclick="startAnimation(2)">Sinelon</button>
+      <button onclick="startAnimation(3)">BPM</button>
+      <button onclick="startAnimation(4)">Juggle</button>
+    </section>
   </section>
-  </section>
-  
 </body>
 </html>
