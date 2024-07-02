@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="/iro.min.js"></script>
+</head>
+<body>
+  <section class="customColor">
+    <div class="wheel">
+      <div id="colorWheel"></div> <!-- Corrected ID to match JavaScript -->
+    </div>
+  </section>
+  
+  <script>
+    // Initialize the color wheel
+    var colorWheel = new iro.ColorPicker("#colorWheel", {
+      color: "#ff0000",
+      width: 650,
+      display: 'block',
+      layout: [{ component: iro.ui.Wheel }]
+    });
+
+    // Handle color change event
+    colorWheel.on('color:change', function(color) {
+      // Change the background color of the wheel section
+      document.querySelector('.wheel').style.backgroundColor = color.hexString;
+
+      // Send color value to the server
+      fetch("/color?value=" + color.hexString.substring(1))
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+        })
+        .catch(error => console.error("Fetch error:", error));
+    });
+
+    // Function to start animation
+    function startAnimation(animationIndex) {
+      fetch(`/animation?a=${animationIndex}`)
+        .then(response => response.text())
+        .then(data => console.log(data));
+    }
+  </script>
+  <section class="animations">
+    <h1>Animations</h1>
+  <section class="buttons">
+    <button onclick="startAnimation(1)">Rainbow Wave</button>
+    <button onclick="startAnimation(2)">Confetti</button>
+    <button onclick="startAnimation(3)">Sinelon</button>
+    <button onclick="startAnimation(4)">BPM</button>
+    <button onclick="startAnimation(5)">Juggle</button>
+  </section>
+  </section>
+  
+</body>
+</html>
