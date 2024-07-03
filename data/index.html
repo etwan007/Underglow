@@ -2,66 +2,87 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="style.css">
-  <script src="/iro.min.js"></script>
 </head>
 <body>
   <section class="customColor">
-    <div class="wheel">
-      <div id="colorWheel"></div>
-      <button id="setColorButton">Set Color</button>
-    </div>
+    <!-- HTML color input -->
+    <input type="color" id="colorPicker" value="#ff0000">
+    <button id="setColorButton">Set Color</button>
   </section>
   
   <script>
-    // Initialize the color wheel
-    var colorWheel = new iro.ColorPicker("#colorWheel", {
-      color: "#ff0000",
-      width: 650,
-      display: 'block',
-      layout: [{ component: iro.ui.Wheel }]
-    });
-
-    // Handle color change event
-    colorWheel.on('color:change', function(color) {
-      // Change the background color of the wheel section
-      document.querySelector('.wheel').style.backgroundColor = color.hexString;
-    });
-
+    // WebSocket initialization
+    const socket = new WebSocket('ws://192.168.4.1:81/');
+  
     // Handle set color button click
     document.getElementById('setColorButton').addEventListener('click', function() {
-      var color = colorWheel.color.hexString.substring(1);
-      fetch("/color", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "value=" + color
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.text();
-      })
-      .then(data => console.log(data))
-      .catch(error => console.error("Fetch error:", error));
+      var hexColor = document.getElementById('colorPicker').value; // e.g., "#ff0000"
+      var rgb = hexToRgb(hexColor);
+      var hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+      var hsvString = 'hsv:' + Math.round(hsv.h * 255) + ',' + Math.round(hsv.s * 255) + ',' + Math.round(hsv.v * 255);
+      setColorViaWebSocket(hsvString);
     });
-
-    // Function to start animation
-    function startAnimation(animationIndex) {
-      fetch(`/animation?a=${animationIndex}`)
-        .then(response => response.text())
-        .then(data => console.log(data));
+  
+    // Function to convert hexadecimal color to RGB
+    function hexToRgb(hex) {
+      // Remove the leading '#'
+      hex = hex.substring(1);
+      // Convert to RGB values
+      var r = parseInt(hex.substring(0, 2), 16);
+      var g = parseInt(hex.substring(2, 4), 16);
+      var b = parseInt(hex.substring(4, 6), 16);
+      return { r: r, g: g, b: b };
     }
+  
+    // Function to convert RGB to HSV
+    function rgbToHsv(r, g, b) {
+      r /= 255, g /= 255, b /= 255;
+  
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, v = max;
+  
+      var d = max - min;
+      s = max == 0 ? 0 : d / max;
+  
+      if (max == min) {
+        h = 0; // achromatic
+      } else {
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+  
+      return { h: h, s: s, v: v };
+    }
+  
+    // Function to send color change request via WebSocket
+    function setColorViaWebSocket(hsvString) {
+      socket.send(hsvString);
+    }
+  
+    // Function to start animation via WebSocket (assuming you already have this part)
+    function startAnimationViaWebSocket(animationIndex) {
+      socket.send('animation:' + animationIndex);
+    }
+  
+    // Handle WebSocket messages (optional if you want to react to server responses)
+    socket.onmessage = function(event) {
+      const message = event.data;
+      // Handle server responses or notifications if needed
+    };
   </script>
+
   <section class="animations">
     <h1>Animations</h1>
     <section class="buttons">
-      <button onclick="startAnimation(0)">Rainbow Wave</button>
-      <button onclick="startAnimation(1)">Confetti</button>
-      <button onclick="startAnimation(2)">Sinelon</button>
-      <button onclick="startAnimation(3)">BPM</button>
-      <button onclick="startAnimation(4)">Juggle</button>
+      <button onclick="startAnimationViaWebSocket(0)">Rainbow Wave</button>
+      <button onclick="startAnimationViaWebSocket(1)">Confetti</button>
+      <button onclick="startAnimationViaWebSocket(2)">Sinelon</button>
+      <button onclick="startAnimationViaWebSocket(3)">BPM</button>
+      <button onclick="startAnimationViaWebSocket(4)">Juggle</button>
     </section>
   </section>
 </body>

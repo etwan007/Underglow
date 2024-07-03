@@ -22,26 +22,28 @@ body {
     background-color: rgba(200, 30, 255, 0.25);
   }
   
-   
   .customColor {
     display: flex;
+    width: 80vw;
+    height: auto;
+    padding: 20px;
+    margin: 50px;
+    border-radius: 100px;
     justify-content: center;
-    align-items: center;
-    width: 100%;
+    background-color: #ffffff;
+  }
+
+  #setColorButton {
+    display: block;
+  }
+
+  #colorPicker {
+    display: block;
+    width: 40px;
+    height: auto;
+    padding: 20px;
   }
   
-  .wheel {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 700px;
-    height: 700px;
-    padding: 50px;
-    margin-top: 100px;
-    border-radius: 100px; /* Fully rounded corners */
-    transition: background-color 0.1s ease; /* Smooth transition for background color */
-    background-color: #f0f0f0;
-  }
 
   .animations {
     margin-top: 20px;
